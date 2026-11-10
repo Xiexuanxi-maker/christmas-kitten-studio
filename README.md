@@ -66,9 +66,9 @@ node scripts/provision.mjs
 
 1. 进入 Cloudflare Zero Trust，设置团队名称，记录 `https://YOURTEAM.cloudflareaccess.com`。
 2. 打开 **Integrations → Identity providers → Add new identity provider → One-time PIN**。新 Zero Trust 组织不会自动启用 OTP。
-3. 添加 Self-hosted Access application，覆盖整个应用域名。只添加允许邮箱 `xiexuanxi@outlook.fr` 的 Allow policy，登录方式选择 One-time PIN。
-4. 在 Access application 的设置中复制 Application Audience (AUD)，这是 64 位十六进制字符串。
-5. 若使用 `workers.dev`，在 Workers 项目的 Settings → Domains & Routes 中为该 workers.dev 域名启用 Cloudflare Access，再确认策略和 AUD；若使用自定义域名，应先创建该 hostname 对应的 Access application。
+3. 若使用默认 `workers.dev` 地址，先在 **Workers & Pages** 查看账户的 Workers 子域名；完整应用域名为 `christmas-kitten-studio.<你的 Workers 子域名>.workers.dev`。然后在 **Zero Trust → Access → Applications** 添加 Self-hosted 应用，将这个完整域名作为应用域名。可以在 Worker 首次部署前创建这种 hostname-based Access 应用，无需先发布占位 Worker。若使用自定义域名，则填写准备部署的完整自定义域名。
+4. 应用的 Allow policy 只允许邮箱 `xiexuanxi@outlook.fr`，登录方式选择 One-time PIN。
+5. 在 Access 应用设置中复制 Application Audience (AUD)，这是 64 位十六进制字符串。将 AUD 填入 GitHub `production` Environment 的 `ACCESS_AUDIENCE` Variable，将步骤 1 的团队地址填入 `ACCESS_TEAM_DOMAIN` Variable，再运行部署工作流。
 
 用户打开受保护的网址后，在 **Cloudflare 托管的登录弹窗/页面**输入邮箱和收到的一次性验证码。Cloudflare 发送验证码，应用验证 Access JWT 的公钥签名、issuer、audience、过期时间和邮箱，服务器决定管理员身份。APP 配置缺少 Access 信息时，生产 API 会保持锁定。
 
@@ -121,6 +121,7 @@ Seedance 是异步任务：提交镜头后返回 task ID，应用查询 queued /
 - [Seedance / 火山方舟 API 文档](https://www.volcengine.com/docs/82379)
 - [Cloudflare Agents AI SDK provider](https://developers.cloudflare.com/agents/models/ai-sdk/)
 - [Cloudflare Access OTP](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/)
+- [Workers 的 Cloudflare Access 与 hostname-based 保护](https://developers.cloudflare.com/workers/configuration/cloudflare-access/)
 - [Access JWT 验证](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/)
 - [Cloudflare Workers GitHub Actions](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)
 - [Wrangler 配置](https://developers.cloudflare.com/workers/wrangler/configuration/)
