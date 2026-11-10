@@ -44,17 +44,21 @@ Worker 在 Wrangler 输出的本地地址运行；`npm run dev:worker` 前先构
 
 工作流在 push / pull request 时仅执行验证。只有手动运行 Actions 的 **Validate and deploy** 工作流才部署生产；仓库 push 不会自动发布。
 
-### 1. 准备 Cloudflare 资源
+### 1. 准备 Cloudflare 账户
 
-在安全的环境变量设置中提供 `CLOUDFLARE_ACCOUNT_ID` 与 `CLOUDFLARE_API_TOKEN`，不要把值写进源代码或聊天。Token 限定目标账户并授予 Workers Scripts Edit、D1 Edit、Workers R2 Storage Edit；使用自定义域名时还需要目标 zone 的相关 Workers Routes / DNS 权限。
+创建 Cloudflare API Token，限定目标账户并授予 Workers Scripts Edit、D1 Edit、Workers R2 Storage Edit；使用自定义域名时还需要目标 zone 的相关 Workers Routes / DNS 权限。账户应已启用 R2 与 Workers AI，并具有相应计费资格。将 Token 与账户 ID 输入后面的 GitHub `production` Environment Secrets，**不需要把密钥交给开发助手或写进聊天**。
+
+生产工作流会自动查找并复用 `kitten-studio` D1 数据库及 `kitten-studio-media` 私有 R2 bucket；不存在时自动创建。无需先在本地运行资源脚本，也不必预先填写 D1 UUID。不要启用 R2 公共开发 URL；应用通过已认证 API 访问媒体。
+
+如果要在自己的电脑提前准备资源，也可以在本地安全环境变量中配置 `CLOUDFLARE_ACCOUNT_ID` 与 `CLOUDFLARE_API_TOKEN` 后运行：
 
 ```sh
 node scripts/provision.mjs
 ```
 
-脚本复用或创建 `kitten-studio` D1 数据库及 `kitten-studio-media` 私有 R2 bucket，将真实资源标识写入 `wrangler.jsonc`，**不会部署**。可通过 `R2_BUCKET_NAME` 指定已有桶名。不要启用 R2 公共开发 URL；应用通过已认证 API 访问媒体。
+该可选脚本将真实资源标识写入 `wrangler.jsonc`，**不会部署**。可通过 `R2_BUCKET_NAME` 指定桶名，或通过 `D1_DATABASE_ID` 指定已有数据库。
 
-初始配置中的全零 D1 UUID 仅用于本地模拟，不能用于生产部署。记录脚本打印的真实 D1 UUID，供后面的 GitHub Environment 使用。
+初始配置中的全零 D1 UUID 仅用于本地模拟；生产工作流会在发布前将其替换为真实 UUID。
 
 ### 2. 设置邮箱登录和管理员
 
@@ -84,7 +88,7 @@ GitHub repository → Settings → Environments → New environment → `product
 
 | 名称 | 值 |
 | --- | --- |
-| `D1_DATABASE_ID` | provision 脚本生成的真实 D1 UUID，必填 |
+| `D1_DATABASE_ID` | 可选，复用指定数据库的真实 UUID；留空自动复用或创建 `kitten-studio` |
 | `R2_BUCKET_NAME` | 默认 `kitten-studio-media` |
 | `ACCESS_TEAM_DOMAIN` | `https://YOURTEAM.cloudflareaccess.com`，必填 |
 | `ACCESS_AUDIENCE` | Access 应用 AUD，必填 |
@@ -97,9 +101,9 @@ GitHub repository → Settings → Environments → New environment → `product
 
 在 GitHub **Actions → Validate and deploy → Run workflow** 选择 `main`。工作流会：
 
-1. 安装锁定依赖、执行类型检查和测试、构建前端。
-2. 检查生产资源 ID、Access 设置及必需密钥。
-3. 将 D1 migrations 应用到生产数据库。
+1. 安装锁定依赖、执行类型检查和测试、构建前端，检查 Worker 与静态文件。
+2. 检查必需 Secrets；验证 Access 与域名设置后，自动创建或复用 D1 和私有 R2，并写入本次部署的配置。
+3. 构建生产前端，将 D1 migrations 应用到生产数据库。
 4. 通过官方 `cloudflare/wrangler-action@v4` 部署 Worker，并安全上传 `ARK_API_KEY` 为 Worker secret。
 
 GitHub 日志不输出密钥。`ARK_API_KEY` 只能在服务端使用；前端看不到原始密钥。

@@ -13,6 +13,6 @@ Not yet verified:
 
 - No browser-control tool was exposed in this managed environment; browser layout and complete WASM export were not run.
 - Cloudflare account credentials, Access application, D1/R2 resources and Seedance API key are not configured. Real email OTP, inference, result transfer and 40-second video export require production setup.
-- GitHub account Xiexuanxi-maker is connected, but CreateRepository was denied by GitHub. A new empty repository and access to it are required before pushing. Existing unrelated repository was untouched.
+- GitHub account Xiexuanxi-maker is connected. The user created https://github.com/Xiexuanxi-maker/christmas-kitten-studio; metadata reads succeed but git push returned HTTP 403. Repository Contents/Workflows write access must be granted before uploading. Existing unrelated repository was untouched.
 
 Local editing, JSON/SRT exports and music preview require no production credentials. The included images are AI-generated storyboard concepts, not generated video or real product photos.
