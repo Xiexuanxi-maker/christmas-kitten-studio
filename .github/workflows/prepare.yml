@@ -1,0 +1,48 @@
+name: Prepare Cloudflare resources
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/prepare.yml'
+      - 'scripts/inspect-cloudflare.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Verify credentials and prepare D1 and R2
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    concurrency:
+      group: cloudflare-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Inspect Workers hostname
+        run: node scripts/inspect-cloudflare.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Create or reuse private storage and database
+        run: node scripts/provision.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}
+          R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
+      - name: Retain non-secret resource configuration
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-resource-configuration
+          path: |
+            wrangler.jsonc
+            cloudflare-inspection.json
+          retention-days: 7
