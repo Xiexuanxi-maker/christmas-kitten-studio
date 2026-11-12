@@ -26,3 +26,7 @@ jobs:
         run: node scripts/check-seedance.mjs
         env:
           ARK_API_KEY: ${{ secrets.ARK_API_KEY }}
+      - name: Check public API connectivity if verification failed
+        if: failure()
+        run: >-
+          node --input-type=module -e "import { probeSeedanceKey } from './scripts/check-seedance.mjs'; const result = await probeSeedanceKey({ apiKey: 'connectivity-check-not-a-real-key' }); console.log('PUBLIC_ARK_ROUTE', JSON.stringify(result));"

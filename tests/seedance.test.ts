@@ -24,6 +24,20 @@ describe('Seedance task creation', () => {
     });
   });
 
+  it('normalizes clipboard whitespace before using a server-side secret', async () => {
+    const fetcher = vi.fn().mockResolvedValue(response({ id: 'cgt-trimmed' }));
+    vi.stubGlobal('fetch', fetcher);
+    await createTask(`  ${key}\n`, model, prompt, 4);
+    expect(fetcher.mock.calls[0][1].headers.Authorization).toBe(`Bearer ${key}`);
+  });
+
+  it.each(['bad\nheader', 'API Key：密钥', 'key with spaces'])('rejects an invalid credential header before any request', async invalid => {
+    const fetcher = vi.fn();
+    vi.stubGlobal('fetch', fetcher);
+    await expect(createTask(invalid, model, prompt, 4)).rejects.toThrow('API key');
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it('validates configuration and user input before spending a provider request', async () => {
     const fetcher = vi.fn();
     vi.stubGlobal('fetch', fetcher);

@@ -20,10 +20,11 @@ type JsonObject = Record<string, unknown>;
 const isObject = (value: unknown): value is JsonObject => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 
 function credentials(apiKey: string) {
-  if (typeof apiKey !== 'string' || !apiKey.trim() || /[\r\n]/.test(apiKey)) {
+  const key = typeof apiKey === 'string' ? apiKey.trim() : '';
+  if (!/^[\x21-\x7E]+$/.test(key)) {
     throw new SeedanceError('Seedance API key is not configured. Add ARK_API_KEY as a Worker secret.');
   }
-  return { Authorization: `Bearer ${apiKey.trim()}`, 'Content-Type': 'application/json' };
+  return { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' };
 }
 
 function validId(value: unknown): value is string {
