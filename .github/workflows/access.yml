@@ -1,0 +1,47 @@
+name: Configure Cloudflare email login
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/access.yml'
+      - 'scripts/setup-access.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  access:
+    name: Configure owner email login
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    concurrency:
+      group: cloudflare-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Discover application hostname
+        run: node scripts/inspect-cloudflare.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Configure email PIN and owner access policy
+        run: node scripts/setup-access.mjs
+        env:
+          ZERO_TRUST_ONBOARDING_CONFIRMED: 'true'
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Retain public Access configuration
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-access-configuration
+          path: |
+            wrangler.jsonc
+            access-setup.json
+          retention-days: 7

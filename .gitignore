@@ -8,3 +8,7 @@ dist/
 public/ffmpeg/
 *.tsbuildinfo
 test-results/
+
+# Generated public setup reports
+cloudflare-inspection.json
+access-setup.json

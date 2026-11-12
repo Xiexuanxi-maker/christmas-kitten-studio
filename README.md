@@ -58,19 +58,20 @@ node scripts/provision.mjs
 
 该可选脚本将真实资源标识写入 `wrangler.jsonc`，**不会部署**。可通过 `R2_BUCKET_NAME` 指定桶名，或通过 `D1_DATABASE_ID` 指定已有数据库。
 
-初始配置中的全零 D1 UUID 仅用于本地模拟；生产工作流会在发布前将其替换为真实 UUID。
+生产工作流会通过目标账户的 API 确认实际数据库标识，再应用迁移与发布。
 
 ### 2. 设置邮箱登录和管理员
 
 管理员固定为 **`xiexuanxi@outlook.fr`**。
 
-1. 进入 Cloudflare Zero Trust，设置团队名称，记录 `https://YOURTEAM.cloudflareaccess.com`。
-2. 打开 **Integrations → Identity providers → Add new identity provider → One-time PIN**。新 Zero Trust 组织不会自动启用 OTP。
-3. 若使用默认 `workers.dev` 地址，先在 **Workers & Pages** 查看账户的 Workers 子域名；完整应用域名为 `christmas-kitten-studio.<你的 Workers 子域名>.workers.dev`。然后在 **Zero Trust → Access → Applications** 添加 Self-hosted 应用，将这个完整域名作为应用域名。可以在 Worker 首次部署前创建这种 hostname-based Access 应用，无需先发布占位 Worker。若使用自定义域名，则填写准备部署的完整自定义域名。
-4. 应用的 Allow policy 只允许邮箱 `xiexuanxi@outlook.fr`，登录方式选择 One-time PIN。
-5. 在 Access 应用设置中复制 Application Audience (AUD)，这是 64 位十六进制字符串。将 AUD 填入 GitHub `production` Environment 的 `ACCESS_AUDIENCE` Variable，将步骤 1 的团队地址填入 `ACCESS_TEAM_DOMAIN` Variable，再运行部署工作流。
+1. 在 [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) 完成 Free 方案开通及页面要求的付款信息步骤。此步骤由账户持有人操作。
+2. 给同一账户的部署 Token 增加两项 Edit 权限：**Access: Organizations, Identity Providers, and Groups** 与 **Access: Apps and Policies**。
+3. 运行 Actions 的 **Configure Cloudflare email login** 工作流。它复用已存在的团队；只有明确不存在且已确认完成订阅开通时才初始化团队名称。随后复用或创建邮箱 One-time PIN，以及仅允许管理员邮箱的专属应用与策略。
+4. 脚本自动读取团队地址和应用 AUD，并写入本次部署的 Wrangler 配置；无需手动复制。现有无关应用、登录方式、策略和订阅均保留。此准备流程不会发布网站。
 
-用户打开受保护的网址后，在 **Cloudflare 托管的登录弹窗/页面**输入邮箱和收到的一次性验证码。Cloudflare 发送验证码，应用验证 Access JWT 的公钥签名、issuer、audience、过期时间和邮箱，服务器决定管理员身份。APP 配置缺少 Access 信息时，生产 API 会保持锁定。
+默认网址为 `christmas-kitten-studio.<账户 Workers 子域名>.workers.dev`。首次准备流程会复用已有 Workers 子域名，仅在 Cloudflare 明确返回尚未登记时创建。
+
+如果选择手动配置 Access，则在生产 Environment 同时填写下面的 `ACCESS_TEAM_DOMAIN` 与 `ACCESS_AUDIENCE`。部署工作流在两项均存在时使用该配置，否则自动配置邮箱登录。后台始终验证 Access JWT 签名、issuer、audience、过期时间及管理员邮箱；配置缺失时 API 拒绝访问。
 
 ### 3. 设置 GitHub `production` Environment
 
@@ -90,8 +91,8 @@ GitHub repository → Settings → Environments → New environment → `product
 | --- | --- |
 | `D1_DATABASE_ID` | 可选，复用指定数据库的真实 UUID；留空自动复用或创建 `kitten-studio` |
 | `R2_BUCKET_NAME` | 默认 `kitten-studio-media` |
-| `ACCESS_TEAM_DOMAIN` | `https://YOURTEAM.cloudflareaccess.com`，必填 |
-| `ACCESS_AUDIENCE` | Access 应用 AUD，必填 |
+| `ACCESS_TEAM_DOMAIN` | 手动配置时填写 `https://YOURTEAM.cloudflareaccess.com`；自动配置时留空 |
+| `ACCESS_AUDIENCE` | 手动配置时填写 Access 应用 AUD；自动配置时留空 |
 | `SEEDANCE_MODEL` | 默认 `doubao-seedance-2-0-260128`；也可设置账户授权的对应模型/推理接入点 |
 | `APP_HOSTNAME` | 可选，Cloudflare DNS 内的自定义域名，例如 `kitten.example.com` |
 

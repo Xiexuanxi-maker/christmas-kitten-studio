@@ -19,8 +19,9 @@ const bucketName = env.R2_BUCKET_NAME || config.r2_buckets[0].bucket_name;
 let databaseId = env.D1_DATABASE_ID;
 
 function required(name) {
-  if (!env[name]?.trim()) throw new Error(`${name} is required; add it to GitHub production environment configuration.`);
-  return env[name].trim();
+  const value = env[name]?.trim() || config.vars?.[name]?.trim();
+  if (!value) throw new Error(`${name} is required; configure email login or add the GitHub production variable.`);
+  return value;
 }
 function validateAccess() {
   const domain = required('ACCESS_TEAM_DOMAIN').replace(/\/$/, '');
