@@ -3,28 +3,44 @@
   "name": "christmas-kitten-studio",
   "main": "worker/index.ts",
   "compatibility_date": "2026-11-01",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "workers_dev": true,
   "preview_urls": false,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api", "/api/*"]
+    "run_worker_first": [
+      "/api",
+      "/api/*"
+    ]
   },
-  "ai": { "binding": "AI" },
-  "d1_databases": [{
-    "binding": "DB",
-    "database_name": "kitten-studio",
-    "database_id": "c4ba26ef-688f-4473-a047-79842d1296d8",
-    "migrations_dir": "migrations"
-  }],
-  "r2_buckets": [{"binding": "MEDIA", "bucket_name": "kitten-studio-media"}],
+  "ai": {
+    "binding": "AI"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kitten-studio",
+      "database_id": "c4ba26ef-688f-4473-a047-79842d1296d8",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "kitten-studio-media"
+    }
+  ],
   "vars": {
     "ADMIN_EMAIL": "xiexuanxi@outlook.fr",
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUDIENCE": "",
+    "ACCESS_TEAM_DOMAIN": "https://xiexuanxi-studio.cloudflareaccess.com",
+    "ACCESS_AUDIENCE": "88b0dcd6cf4b3510d60917139e7252e1c708d69e703a76c65c5c64f9300922a2",
     "SEEDANCE_MODEL": "doubao-seedance-2-0-260128"
   },
-  "observability": {"enabled": true}
+  "observability": {
+    "enabled": true
+  }
 }
