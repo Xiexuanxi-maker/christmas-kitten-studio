@@ -105,3 +105,7 @@ Audio is generated per clip. Merely stitching these clips does not guarantee a c
 ## Cloudflare boundary
 
 Cloudflare can provide application hosting (Workers), login (Access email OTP), D1, R2, AI-assisted script editing via Workers AI, and deployment infrastructure together with GitHub Actions. **Seedance inference is a Volcano Ark service**; it is not a Cloudflare-hosted model. The user requested Seedance as well as all services on Cloudflare, so disclose this concrete necessary exception rather than claiming all inference runs on Cloudflare. Do not replace Seedance with a different video model silently.
+
+## Account model activation
+
+Creating a key does not itself enable Seedance. Verify Seedance 2.0 in the same `default` project using the [official activation page](https://ark.volcengine.com/region:cn-beijing/openManagement?LLM=%7B%7D&advancedActiveKey=model&projectName=default&tab=ComputerVision). The [official tutorial](https://docs.volcengine.com/docs/zh/ark/seedance-2-0.md) documents identity and balance/resource-pack requirements. Subscription or recharge decisions remain with the account owner; credential probes never submit inference jobs.

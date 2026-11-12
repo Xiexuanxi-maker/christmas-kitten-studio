@@ -24,15 +24,21 @@ Cloudflare Access preparation on 2026-11-12:
 
 Production deployment on 2026-11-12:
 
-- [Deploy run](https://github.com/Xiexuanxi-maker/christmas-kitten-studio/actions/runs/43145800416) succeeded, including tests, D1 migrations, protected Access configuration, static assets, Worker deployment and runtime secret upload.
+- [Deploy run](https://github.com/Xiexuanxi-maker/christmas-kitten-studio/actions/runs/43146912617) succeeded, including tests, D1 migrations, protected Access configuration, static assets, Worker deployment and runtime secret upload.
 - URL: https://christmas-kitten-studio.xiexuanxi-maker.workers.dev
-- Worker version: `ca0a1a69-999b-41bf-82f1-3458699e3a5c`.
+- Worker version: `094c5696-634f-495d-8349-a8df0f11a814`.
 - Unauthenticated requests to `/`, `/api/session`, `/api/project` and the hero image each return HTTP 302 to the intended Cloudflare Access team login. This checks protection of both APIs and static assets.
+
+Seedance credential verification:
+
+- [Read-only check](https://github.com/Xiexuanxi-maker/christmas-kitten-studio/actions/runs/43146861106) returned `ARK_AUTH_OK HTTP_200`. No generation request was sent, and task contents or credentials were not logged.
+- Current [GitHub CI](https://github.com/Xiexuanxi-maker/christmas-kitten-studio/actions/runs/43146861113) passed 145 tests. The final deployed Worker normalizes surrounding clipboard whitespace before using credentials and rejects invalid header characters.
+- Authentication and task-list access do not establish model activation, sufficient funds or paid inference availability.
 
 Not yet verified:
 
 - No browser-control tool was exposed in this managed environment; browser layout and complete WASM export were not run.
-- The Seedance API key has been uploaded as a runtime secret. Read-only provider verification and real browser email login remain separate checks; paid inference, generated video transfer and full 40-second export have not been run.
+- Real browser email login, Seedance model activation, paid inference, generated-video transfer and full 40-second export remain end-to-end checks. The runtime secret is present, and its read-only provider authentication succeeded.
 - The current GitHub connection cannot manage the production environment or Secrets (HTTP 403); those values must be entered through GitHub settings. Existing unrelated repositories were untouched.
 
 Local editing, JSON/SRT exports and music preview require no production credentials. The included images are AI-generated storyboard concepts, not generated video or real product photos.
