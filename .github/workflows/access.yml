@@ -36,6 +36,12 @@ jobs:
           ZERO_TRUST_ONBOARDING_CONFIRMED: 'true'
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Diagnose Access authorization without changing resources
+        if: failure()
+        run: node scripts/diagnose-access.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Retain public Access configuration
         if: success()
         uses: actions/upload-artifact@v4
