@@ -16,7 +16,7 @@
   "d1_databases": [{
     "binding": "DB",
     "database_name": "kitten-studio",
-    "database_id": "00000000-0000-0000-0000-000000000000",
+    "database_id": "c4ba26ef-688f-4473-a047-79842d1296d8",
     "migrations_dir": "migrations"
   }],
   "r2_buckets": [{"binding": "MEDIA", "bucket_name": "kitten-studio-media"}],
