@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const APP_NAME = 'Christmas Kitten Studio';
 const POLICY_NAME = 'Kitten Studio administrator';
-const PERMISSIONS = 'Cloudflare Access permission denied. Add account Edit permissions for Access: Organizations, Identity Providers, and Groups, and Access: Apps and Policies to the existing token.';
+const PERMISSIONS = 'Cloudflare Access denied this request. Check the account Access Edit permissions and Zero Trust activation.';
 const ONBOARDING = 'Complete Cloudflare Zero Trust onboarding, including the team domain, before configuring email login.';
 const id = value => typeof value === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9-]{0,199}$/.test(value);
 const audience = value => typeof value === 'string' && /^[a-f0-9]{64}$/i.test(value);
@@ -53,7 +53,10 @@ export async function setupAccess({ account, token, hostname, ownerEmail = 'xiex
         ...(body === undefined ? {} : { body: JSON.stringify(body) }), redirect: 'error', signal: AbortSignal.timeout(30000) });
       data = await response.json();
     } catch { fail('Cloudflare Access could not be reached or returned an invalid response.'); }
-    if (response.status === 401 || response.status === 403) fail(PERMISSIONS);
+    if (response.status === 401 || response.status === 403) {
+      const codes = array(data?.errors).map(error => Number.isInteger(error?.code) ? error.code : 'unknown').join(',') || 'unknown';
+      fail(`${PERMISSIONS} (${method} ${path.split('?')[0]}; HTTP ${response.status}; codes ${codes}).`, response.status);
+    }
     if (path === '/access/organizations' && method === 'GET' && response.status === 404
       && data?.success === false && Array.isArray(data.errors)) fail(ONBOARDING, 404);
     if (!response.ok || data?.success !== true) {

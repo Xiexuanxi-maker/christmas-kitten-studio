@@ -85,6 +85,7 @@ describe('Cloudflare Access setup identity and mutation boundary', () => {
     expect(error).toBeInstanceOf(Error);
     expect(error.message).toMatch(/Access|permission/i);
     expect(error.message).not.toContain(token);
+    expect(error.message).toContain('GET /access/organizations; HTTP 403; codes 10000');
     expect(fixture.state.writes).toEqual([]);
     expect(fixture.fetcher).toHaveBeenCalledTimes(1);
   });
