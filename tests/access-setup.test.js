@@ -33,7 +33,7 @@ function api(options = {}) {
     if (path === '/access/organizations' && method === 'GET') {
       if (options.orgMalformed404) return new Response('not json', { status: 404 });
       if (options.orgInvalid404) return new Response(JSON.stringify({ success: true, result: null }), { status: 404 });
-      if (options.orgStatus && !state.organizationCreated) return fail(options.orgStatus, options.orgCode ?? 10000, `do not expose ${token}`);
+      if (options.orgStatus && !state.organizationCreated) return fail(options.orgStatus, options.orgCode ?? 10000, options.orgErrorMessage ?? `do not expose ${token}`);
       return json(state.organizationBody ?? options.org ?? { name: 'Existing team', auth_domain: 'team.cloudflareaccess.com' });
     }
     if (path === '/access/organizations' && method === 'POST') {
@@ -124,6 +124,25 @@ describe('Cloudflare Access setup identity and mutation boundary', () => {
     expect(fixture.state.requests.slice(0, 3).map(call => [call.method, call.path])).toEqual([
       ['GET', '/access/organizations'], ['POST', '/access/organizations'], ['GET', '/access/organizations'],
     ]);
+  });
+
+  it('initializes only after the exact Access not-enabled marker and confirmed onboarding', async () => {
+    const fixture = api({ orgStatus: 403, orgCode: 9999, orgErrorMessage: 'access.api.error.not_enabled: Access is not enabled for this account.' });
+    await expect(fixture.run({ allowCreateOrganization: true })).resolves.toMatchObject({ access_team_domain: 'https://xiexuanxi-studio.cloudflareaccess.com' });
+    expect(fixture.state.writes).toHaveLength(1);
+    expect(fixture.state.writes[0].path).toBe('/access/organizations');
+  });
+
+  it('does not initialize from the not-enabled marker without user-confirmed onboarding', async () => {
+    const fixture = api({ orgStatus: 403, orgCode: 9999, orgErrorMessage: 'access.api.error.not_enabled: Access is not enabled.' });
+    await expect(fixture.run()).rejects.toThrow(/onboard/i);
+    expect(fixture.state.writes).toEqual([]);
+  });
+
+  it.each(['Authentication error', 'other.error: access.api.error.not_enabled'])('never treats another 9999 denial as permission to initialize: %s', async orgErrorMessage => {
+    const fixture = api({ orgStatus: 403, orgCode: 9999, orgErrorMessage });
+    await expect(fixture.run({ allowCreateOrganization: true })).rejects.toThrow();
+    expect(fixture.state.writes).toEqual([]);
   });
 
   it('preserves an existing organization even when onboarding has been explicitly confirmed', async () => {

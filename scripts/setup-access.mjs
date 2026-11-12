@@ -53,6 +53,14 @@ export async function setupAccess({ account, token, hostname, ownerEmail = 'xiex
         ...(body === undefined ? {} : { body: JSON.stringify(body) }), redirect: 'error', signal: AbortSignal.timeout(30000) });
       data = await response.json();
     } catch { fail('Cloudflare Access could not be reached or returned an invalid response.'); }
+    const explicitNotEnabled = path === '/access/organizations' && method === 'GET'
+      && response.status === 403 && data?.success === false && Array.isArray(data.errors)
+      && data.errors.length === 1 && data.errors[0]?.code === 9999
+      && typeof data.errors[0]?.message === 'string'
+      && data.errors[0].message.split(':')[0].trim() === 'access.api.error.not_enabled';
+    // Access also uses this documented service-initialization marker before a team exists.
+    // It is distinct from an authorization failure; user-confirmed onboarding is still required.
+    if (explicitNotEnabled) fail(ONBOARDING, 403);
     if (response.status === 401 || response.status === 403) {
       const codes = array(data?.errors).map(error => Number.isInteger(error?.code) ? error.code : 'unknown').join(',') || 'unknown';
       fail(`${PERMISSIONS} (${method} ${path.split('?')[0]}; HTTP ${response.status}; codes ${codes}).`, response.status);
@@ -82,7 +90,7 @@ export async function setupAccess({ account, token, hostname, ownerEmail = 'xiex
   catch (error) {
     // The user must already have completed the separate subscription/terms checkout.
     // Never infer onboarding or authorize creation from a permission/network failure.
-    if (!(error instanceof AccessSetupError && error.status === 404 && error.message === ONBOARDING && allowCreateOrganization === true)) throw error;
+    if (!(error instanceof AccessSetupError && [403, 404].includes(error.status) && error.message === ONBOARDING && allowCreateOrganization === true)) throw error;
     try { await api('/access/organizations', 'POST', { name: 'Purrfect Studio', auth_domain: 'xiexuanxi-studio.cloudflareaccess.com' }); }
     catch (creationError) {
       // Another request may have initialized the organization in the meantime.

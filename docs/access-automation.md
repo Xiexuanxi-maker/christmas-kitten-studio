@@ -167,3 +167,7 @@ Sources:
 The next user step can be only **complete Zero Trust Free onboarding**. After it is complete, ask for only the token permission edit if still needed. Once the updated token is saved as the same GitHub secret, the workflow can handle organization discovery, OTP IdP, hostname-scoped app, exact owner policy, audience extraction, Wrangler configuration and deployment. The user should not need to copy an Access AUD manually.
 
 No authenticated Cloudflare requests or subscription changes were performed for this research.
+
+## Access service initialization response
+
+Cloudflare can also return HTTP 403 with the exact error marker `access.api.error.not_enabled` and code 9999 before a team is initialized ([official workers-sdk issue](https://github.com/cloudflare/workers-sdk/issues/3573)). After user-confirmed Free onboarding, setup may initialize the organization for that exact marker only. Generic 403, other 9999 messages, invalid responses and permission failures never authorize initialization. Existing organizations are reused.

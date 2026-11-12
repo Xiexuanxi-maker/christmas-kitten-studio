@@ -18,9 +18,10 @@ if(!account||!/^[a-f0-9]{32}$/i.test(account)||!token||/[\r\n]/.test(token)){
       const codes=Array.isArray(data?.errors)?data.errors.map(e=>Number.isInteger(e?.code)?e.code:'unknown').join(',')||'none':'none';
       const messages=Array.isArray(data?.errors)?data.errors.map(e=>typeof e?.message==='string'?e.message.toLowerCase():''):[];
       const kind=messages.some(m=>/authenticat|authoriz|forbidden|permission/.test(m))?'authorization':messages.some(m=>/not found|does not exist|no organization/.test(m))?'not_found':messages.some(m=>/subscription|billing|activate|enable/.test(m))?'activation':codes==='none'?'none':'other';
+      const notEnabled=Array.isArray(data?.errors)&&data.errors.some(e=>e?.code===9999&&typeof e.message==='string'&&e.message.split(':')[0].trim()==='access.api.error.not_enabled');
       const status=data?.result?.status;
       const active=['active','disabled','expired'].includes(status)?`; token status ${status}`:'';
-      console.log(`${label}: HTTP ${response.status}; success ${data?.success===true}; codes ${codes}; error category ${kind}${active}`);
+      console.log(`${label}: HTTP ${response.status}; success ${data?.success===true}; codes ${codes}; error category ${kind}; explicit Access not-enabled ${notEnabled}${active}`);
     }catch{console.log(`${label}: request could not be completed.`);}
   }
 }
