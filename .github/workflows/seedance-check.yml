@@ -1,0 +1,28 @@
+name: Verify Seedance connection
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/seedance-check.yml'
+      - 'scripts/check-seedance.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Read-only Seedance credential check
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Verify authentication without generating video
+        run: node scripts/check-seedance.mjs
+        env:
+          ARK_API_KEY: ${{ secrets.ARK_API_KEY }}

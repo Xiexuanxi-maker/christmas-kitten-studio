@@ -22,10 +22,17 @@ Cloudflare Access preparation on 2026-11-12:
 - Team domain: `https://xiexuanxi-studio.cloudflareaccess.com`. Planned site: `christmas-kitten-studio.xiexuanxi-maker.workers.dev`.
 - Current [GitHub CI](https://github.com/Xiexuanxi-maker/christmas-kitten-studio/actions/runs/43144053952) passed with 105 tests and Cloudflare packaging checks.
 
+Production deployment on 2026-11-12:
+
+- [Deploy run](https://github.com/Xiexuanxi-maker/christmas-kitten-studio/actions/runs/43145800416) succeeded, including tests, D1 migrations, protected Access configuration, static assets, Worker deployment and runtime secret upload.
+- URL: https://christmas-kitten-studio.xiexuanxi-maker.workers.dev
+- Worker version: `ca0a1a69-999b-41bf-82f1-3458699e3a5c`.
+- Unauthenticated requests to `/`, `/api/session`, `/api/project` and the hero image each return HTTP 302 to the intended Cloudflare Access team login. This checks protection of both APIs and static assets.
+
 Not yet verified:
 
 - No browser-control tool was exposed in this managed environment; browser layout and complete WASM export were not run.
-- The Seedance API key and real browser email login have not yet been verified. Paid inference, generated video transfer and full 40-second export remain end-to-end checks after runtime credentials are complete.
+- The Seedance API key has been uploaded as a runtime secret. Read-only provider verification and real browser email login remain separate checks; paid inference, generated video transfer and full 40-second export have not been run.
 - The current GitHub connection cannot manage the production environment or Secrets (HTTP 403); those values must be entered through GitHub settings. Existing unrelated repositories were untouched.
 
 Local editing, JSON/SRT exports and music preview require no production credentials. The included images are AI-generated storyboard concepts, not generated video or real product photos.

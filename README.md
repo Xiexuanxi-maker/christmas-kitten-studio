@@ -1,5 +1,7 @@
 # Christmas Kitten Studio
 
+部署地址：[christmas-kitten-studio.xiexuanxi-maker.workers.dev](https://christmas-kitten-studio.xiexuanxi-maker.workers.dev)。使用 `xiexuanxi@outlook.fr` 接收邮箱验证码登录。
+
 把 **Christmas Kitten Advent Calendar · 视频分镜 V2** 制作成 9:16、40 秒的圣诞产品视频。界面内置完整英文字幕、暖色产品摄影提示词、轻音乐与 ASMR 开箱音效要求。12–20 秒保留礼盒包装展示；20–32 秒展示 5 只精选小猫。
 
 技术：React / Vite / TypeScript、Hono、Vercel AI SDK、Cloudflare Workers AI、D1、R2、Cloudflare Access，以及 Seedance 官方异步视频 API。使用 AI SDK 不需要 Vercel 托管。
